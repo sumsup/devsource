@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
+	
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<annotation-driven />
+
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory -->
+	<resources mapping="/resources/**" location="/resources/" />
+
+	<!-- Resolves views selected for rendering by @Controllers to .jsp resources in the /WEB-INF/views directory -->
+	<beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+	</beans:bean>
+	
+	<context:component-scan base-package="org.zerock.controller" />
+	
+	<!-- multipartResolver : 스프링에서 파일 업로드와 관련이 있는 객체 -->
+	<beans:bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<beans:property name="maxUploadSize" value="10485760"></beans:property>
+	</beans:bean>
+	
+	<beans:bean id="uploadPath" class="java.lang.String">
+		<beans:constructor-arg value="C:\\zzz\\upload"></beans:constructor-arg>
+	</beans:bean>
+	
+	<!-- 인터셉터를 사용하기 위해서는 namespace에 spring-mvc 가 있어야 함. -->
+	<beans:bean id="sampleInterceptor" class="org.zerock.interceptor.SampleInterceptor"></beans:bean>
+	<interceptors>
+		<interceptor>
+			<mapping path="/doA"/>
+			<mapping path="/doB"/>
+			<beans:ref bean="sampleInterceptor"/>
+		</interceptor>
+	</interceptors>
+	
+	<beans:bean id="loginInterceptor" class="org.zerock.interceptor.LoginInterceptor"/>
+	
+	<beans:bean id="authInterceptor" class="org.zerock.interceptor.AuthInterceptor" />
+	
+	<!-- 로그인 인터셉터 설정. -->
+	<interceptors>
+	
+		<interceptor>
+			<mapping path="/user/loginPost"/>
+			<beans:ref bean="loginInterceptor"/>
+		</interceptor>
+		
+		<interceptor>
+			<!-- 권한을 요구하는 요청들 mapping -->
+			<mapping path="/sboard/register" /> <!-- sboard/register 하기전에 껴들어 -->
+			<mapping path="/sboard/modifyPage" /> <!-- sboard/register 하기전에 껴들어 -->
+			<mapping path="/sboard/removePage" /> <!-- sboard/register 하기전에 껴들어 -->
+			<beans:ref bean="authInterceptor" /> <!-- 뭘로 껴들어? authInterceptor로 껴들어. 권한 확인하게.-->
+		</interceptor>
+		
+	</interceptors>
+	
+	
+	
+	
+</beans:beans>
